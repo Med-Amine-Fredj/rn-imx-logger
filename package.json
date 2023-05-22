@@ -1,0 +1,22 @@
+{
+  "name": "rn-imx-logger",
+  "version": "1.0.10",
+  "description": "Imaxeam logger for react-native",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mqtt",
+    "reactnative",
+    "logger"
+  ],
+  "author": {
+    "name": "Fredj Mohamed Amine",
+    "email": "medamin.fredj@gmail.com"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "sp-react-native-mqtt": "^0.5.1"
+  }
+}
