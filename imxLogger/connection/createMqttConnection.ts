@@ -72,7 +72,7 @@ const LOGGER = (function () {
         return mqttConnection;
       } catch (error) {
         console.error("Erreur in createMqttConnection :  ", error);
-        throw error;
+        return error;
       }
     },
 
