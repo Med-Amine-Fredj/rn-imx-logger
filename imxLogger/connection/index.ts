@@ -1,1 +1,1 @@
-export { default as imxLogger } from "./createMqttConnection";
+export { default as imxRNLogger } from "./createMqttConnection";

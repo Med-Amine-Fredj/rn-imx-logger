@@ -38,36 +38,108 @@ type messagePayloadToMqTTFromUsers = {
   user?: string;
 };
 
+type mqttConnectionTypes = {
+  connection: IMqttClient | null;
+  enableLogging(): void;
+  disableLogging(): void;
+  checkIsEnaled(): boolean;
+  error(payload: messagePayloadToMqTTFromUsers): void;
+  debug(payload: messagePayloadToMqTTFromUsers): void;
+  connect(): void;
+  disconnect(): void;
+};
+
 const LOGGER = (function () {
-  let mqttConnection: IMqttClient | null = null;
+  let mqttConnection: mqttConnectionTypes | null = null;
+
+  let isEnabled = true;
+
+  let topicName: string = "";
 
   return {
     async createMqttConnection(
       option: IMqttClientOptions,
-      onCloseCallBack?: Function,
-      onErrorCallBack?: Function,
-      onMessageCallBack?: Function,
-      onConnectCallBack?: Function
-    ): Promise<IMqttClient> {
+      topic: string,
+      enable?: boolean,
+      onCloseCallBack?: () => void,
+      onErrorCallBack?: (msg: string) => void,
+      onConnectCallBack?: () => void,
+      onMessageCallBack?: (msg: {
+        data: string;
+        qos: QoS;
+        retain: boolean;
+        topic: string;
+      }) => void
+    ): Promise<mqttConnectionTypes> {
       try {
-        const conn = await mqtt?.createClient(option);
+        isEnabled = enable ?? true;
+
+        topicName = topic || "logs";
+
+        const conn: IMqttClient = await mqtt?.createClient(option);
 
         conn.on("closed", function () {
           onCloseCallBack && onCloseCallBack();
         });
 
         conn.on("error", function (msg) {
-          onErrorCallBack && onErrorCallBack();
+          onErrorCallBack && onErrorCallBack(msg);
         });
 
-        conn.on("message", function (msg) {
-          onMessageCallBack && onMessageCallBack();
-        });
         conn.on("connect", function () {
           onConnectCallBack && onConnectCallBack();
         });
 
-        mqttConnection = conn;
+        conn.on("message", function (msg) {
+          onMessageCallBack && onMessageCallBack(msg);
+        });
+
+        mqttConnection = {
+          connection: conn,
+          enableLogging() {
+            isEnabled = true;
+          },
+
+          disableLogging() {
+            isEnabled = false;
+          },
+
+          checkIsEnaled() {
+            return isEnabled;
+          },
+
+          error(payload) {
+            if (!isEnabled) return;
+            conn?.publish(
+              topicName,
+              JSON?.stringify({
+                payload: { ...payload, date: new Date(), level: "errors" },
+              }),
+              1,
+              true
+            );
+          },
+
+          debug(payload: messagePayloadToMqTTFromUsers) {
+            if (!isEnabled) return;
+            conn?.publish(
+              topicName,
+              JSON?.stringify({
+                payload: { ...payload, date: new Date(), level: "debug" },
+              }),
+              1,
+              true
+            );
+          },
+
+          connect() {
+            conn?.connect();
+          },
+
+          disconnect() {
+            conn?.disconnect();
+          },
+        };
 
         return mqttConnection;
       } catch (error) {
@@ -81,71 +153,41 @@ const LOGGER = (function () {
     },
 
     error(payload: messagePayloadToMqTTFromUsers) {
-      mqttConnection?.publish(
-        "logs",
-        JSON?.stringify({
-          payload: { ...payload, date: new Date(), level: "errors" },
-        }),
-        1,
-        true
-      );
+      if (!isEnabled) return;
+      mqttConnection?.error(payload);
     },
 
     debug(payload: messagePayloadToMqTTFromUsers) {
-      if (!mqttConnection) {
-        console.warn(
-          "Make sure you created the MQTT connection successfully !"
-        );
-        return;
-      }
-      mqttConnection.publish(
-        "logs",
-        JSON?.stringify({
-          payload: { ...payload, date: new Date(), level: "debug" },
-        }),
-        1,
-        true
-      );
+      if (!isEnabled) return;
+      mqttConnection?.debug(payload);
     },
 
     connect() {
-      if (!mqttConnection) {
-        console.warn(
-          "Make sure you created the MQTT connection successfully !"
-        );
-        return;
-      }
       mqttConnection?.connect();
     },
 
     disconnect() {
-      if (!mqttConnection) {
-        console.warn(
-          "Make sure you created the MQTT connection successfully !"
-        );
-        return;
-      }
       mqttConnection?.disconnect();
     },
 
     isConnected(): Promise<boolean> | undefined {
-      if (!mqttConnection) {
-        console.warn(
-          "Make sure you created the MQTT connection successfully !"
-        );
-        return;
-      }
-      mqttConnection?.isConnected();
+      return mqttConnection?.connection?.isConnected();
     },
 
     reconnect() {
-      if (!mqttConnection) {
-        console.warn(
-          "Make sure you created the MQTT connection successfully !"
-        );
-        return;
-      }
-      mqttConnection?.reconnect();
+      mqttConnection?.connection?.reconnect();
+    },
+
+    enableLogging() {
+      isEnabled = true;
+    },
+
+    checkIsEnaled() {
+      return isEnabled;
+    },
+
+    disableLogging() {
+      isEnabled = false;
     },
 
     on(
@@ -157,13 +199,7 @@ const LOGGER = (function () {
         topic: string;
       }) => void
     ) {
-      if (!mqttConnection) {
-        console.warn(
-          "Make sure you created the MQTT connection successfully !"
-        );
-        return;
-      }
-      mqttConnection?.on(event, cb);
+      mqttConnection?.connection?.on(event, cb);
     },
   };
 })();
