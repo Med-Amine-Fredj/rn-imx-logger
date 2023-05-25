@@ -1,1 +1,1 @@
-export { imxLogger } from "./imxLogger/connection";
+export { imxRNLogger } from "./imxLogger/connection";
