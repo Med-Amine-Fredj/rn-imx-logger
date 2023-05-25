@@ -4,8 +4,6 @@
 
 ### Installation
 
-
-
 #### Step1
 
 ```
@@ -17,8 +15,6 @@ or
 ```
 npm install  rn-imx-logger sp-react-native-mqtt --save
 ```
-
-
 
 #### Step 2
 
@@ -34,14 +30,10 @@ android {
 }
 ```
 
-
-
 ### Usage
 
-
-
 ```
-import { imxLogger } from "rn-imx-logger";
+import { imxRNLogger } from "rn-imx-logger";
 
 const option = {
       clientId: new Date().getTime().toString(),
@@ -52,38 +44,64 @@ const option = {
       pass: "password",
  };
 
+const topicName = "logs"
 
   useEffect(() => {
-    imxLogger.createMqttConnection(option).then((clientConn) => clientConn.connect());
+   imxRNLogger.createMqttConnection(option, "logs");
     return () => {
       imxLogger.disconnect()
     };
   }, []);
 
 // send DEBUG logs 
- imxLogger.debug({
+ imxRNLogger.debug({
       appName: "app_example",
       context: "context_example1",
       message: "message_example",
-      user: "user_example",
+      user?: "user_example",
+      extra?: any
   })
 
 // send ERROR logs 
- imxLogger.error({
+ imxRNLogger.error({
       appName: "app_example",
       context: "context_example1",
       message: "message_example",
-      user: "user_example",
+      user?: "user_example",
+      extra?: any
   })
 
+//getMqttConnection
+imxRNLogger.getMqttConnection()
 
+//connect
+imxRNLogger.connect()
+
+
+//Disconnect 
+imxRNLogger.disconnect()
+
+
+// Check is Connected
+imxRNLogger.isConnected()
+
+
+//Reconnect 
+imxRNLogger.reconnect()
+
+
+//Enable logging 
+imxRNLogger.enableLogging()
+
+
+// Disable Logging 
+ imxRNLogger.disableLogging()
+
+// check Logging enable or not 
+ imxRNLogger.checkIsEnaled() // return bool
 ```
 
-
-
 ### API
-
-
 
 - `createClient(options, onCloseCallBack,onErrorCallBack,onMessageCallBack,onConnectCallBack)` create new client instance with `options`, async operation
   
@@ -96,10 +114,6 @@ const option = {
   - `auth`: true/false - override = true Set to true if `user` or `pass` exist
   - `clientId`: string client id
   - `keepalive`
-
-
-
-
 
 - `connect()` connect from the connection created to MQTT
 
@@ -116,9 +130,14 @@ const option = {
 - `reconnect()` reconnect from the connection created to MQTT
 
 - `on(event, callback)`: add event listener for
+  
   - event: `connect` - client connected
   - event: `closed` - client disconnected
   - event: `error` - error
   - event: `message` - message object
 
+- `enableLogging()`  to enable logging 
 
+- `disableLogging()`  to disable logging
+
+- `checkIsEnaled()` to check the logging status
