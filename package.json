@@ -1,6 +1,6 @@
 {
   "name": "rn-imx-logger",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "Imaxeam logger for react-native",
   "main": "index.ts",
   "scripts": {
@@ -13,7 +13,8 @@
   "keywords": [
     "mqtt",
     "reactnative",
-    "logger"
+    "logger",
+    "rabbitMQ"
   ],
   "author": {
     "name": "Fredj Mohamed Amine",
