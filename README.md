@@ -44,10 +44,28 @@ const option = {
       pass: "password",
  };
 
+
 const topicName = "logs"
 
+const loggingStatus = {
+    enableDebug: true, 
+    enableError: true 
+}
+
+const callBacks = {
+     onConnectCallBack: () => console.log("Connected"),
+        onCloseCallBack() {
+          console.log("Diconnected");
+        },
+
+      onErrorCallBack:(msg) => console.log("error ", msg),
+
+      onMessageCallBack(msg) {
+          console.log("message ", msg);
+        },
+}
   useEffect(() => {
-   imxRNLogger.createMqttConnection(option, "logs");
+   imxRNLogger.createMqttConnection(option,topicName,loggingStatus,callBacks   );
     return () => {
       imxLogger.disconnect()
     };
@@ -90,15 +108,30 @@ imxRNLogger.isConnected()
 imxRNLogger.reconnect()
 
 
-//Enable logging 
-imxRNLogger.enableLogging()
+//Enable DEBUG  logging 
+imxRNLogger.enableDebugLogging()
+
+//Enable ERRORS logging 
+imxRNLogger.enableErrorLogging()
 
 
-// Disable Logging 
- imxRNLogger.disableLogging()
+// Disable DEBUG  Logging 
+ imxRNLogger.disableDebugLogging()
+
+// Disable ERROR Logging 
+ imxRNLogger.disableErrorLogging()
+
+// Check Error logging status
+ imxRNLogger.checkErrorLoggingStatus()
+
+// Check DEBUG logging status
+ imxRNLogger.checkDebugLoggingStatus()
 
 // check Logging enable or not 
- imxRNLogger.checkIsEnaled() // return bool
+ imxRNLogger.checkIsEnaled() // return {
+                //  errorLoggingStatus: bool,
+               //  debugLoggingStatus: bool,
+              //       }
 ```
 
 ### API
@@ -136,8 +169,16 @@ imxRNLogger.enableLogging()
   - event: `error` - error
   - event: `message` - message object
 
-- `enableLogging()`  to enable logging 
+- `enableErrorLogging()`  to enable error logging
 
-- `disableLogging()`  to disable logging
+- `enableDebugLogging()` to enable debuglogging 
 
-- `checkIsEnaled()` to check the logging status
+- `disableErrorLogging()`  to disable error logging
+
+- `disableDebugLogging()` to disable  debug logging
+
+- `checkDebugLoggingStatus()` to check the debug logging status
+
+- `checkErrorLoggingStatus()` to check the error logging status 
+
+- `checkIsEnaled()` to check the logging status of error and debug 
