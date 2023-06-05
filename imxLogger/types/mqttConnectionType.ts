@@ -1,5 +1,5 @@
 import { IMqttClient } from "sp-react-native-mqtt";
-import { messagePayloadToMqTTFromUsers } from "./messagePayload";
+import { messagePayloadASArg } from "./messagePayloadASArg";
 
 type loggingStatus = {
   errorLoggingStatus: boolean;
@@ -8,6 +8,7 @@ type loggingStatus = {
 
 export type mqttConnectionTypes = {
   connection: IMqttClient | null;
+  setAppName(app_name: string): void;
   enableErrorLogging(): void;
   disableErrorLogging(): void;
   checkErrorLoggingStatus(): boolean;
@@ -15,8 +16,8 @@ export type mqttConnectionTypes = {
   disableDebugLogging(): void;
   checkDebugLoggingStatus(): boolean;
   checkIsEnaled(): loggingStatus;
-  error(payload: messagePayloadToMqTTFromUsers): void;
-  debug(payload: messagePayloadToMqTTFromUsers): void;
+  error(payload: messagePayloadASArg): void;
+  debug(payload: messagePayloadASArg): void;
   connect(): void;
   disconnect(): void;
 };
