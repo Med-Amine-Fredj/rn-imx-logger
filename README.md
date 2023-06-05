@@ -47,6 +47,8 @@ const option = {
 
 const topicName = "logs"
 
+const appName= "example_app_name"
+
 const loggingStatus = {
     enableDebug: true, 
     enableError: true 
@@ -65,7 +67,7 @@ const callBacks = {
         },
 }
   useEffect(() => {
-   imxRNLogger.createMqttConnection(option,topicName,loggingStatus,callBacks   );
+   imxRNLogger.createMqttConnection(option,topicName,appName,loggingStatus,callBacks   );
     return () => {
       imxLogger.disconnect()
     };
@@ -99,6 +101,9 @@ imxRNLogger.connect()
 //Disconnect 
 imxRNLogger.disconnect()
 
+
+//Set app name 
+imxRNLogger.setAppName("Hello world !")
 
 // Check is Connected
 imxRNLogger.isConnected()
@@ -182,3 +187,5 @@ imxRNLogger.enableErrorLogging()
 - `checkErrorLoggingStatus()` to check the error logging status 
 
 - `checkIsEnaled()` to check the logging status of error and debug 
+
+- `setAppName()` to set the app name sending in logs
