@@ -4,7 +4,9 @@ import { mqttConnectionTypes } from "../types/mqttConnectionType";
 
 import { IMqttClientOptions } from "../types/connectionOptionsType";
 
-import { messagePayloadToMqTTFromUsers } from "../types/messagePayload";
+import { messagePayloadASArg } from "../types/messagePayloadASArg";
+
+import tryStringifyJSONObject from "../helpers/tryStringifyJSONObject";
 
 const LOGGER = (function () {
   let mqttConnection: mqttConnectionTypes | null = null;
@@ -15,10 +17,13 @@ const LOGGER = (function () {
 
   let topicName: string = "";
 
+  let app_name: string = "N/A";
+
   return {
     async createMqttConnection(
       option: IMqttClientOptions,
       topic: string,
+      appName?: string,
       extraOptions?: {
         enableError: boolean;
         enableDebug: boolean;
@@ -39,6 +44,8 @@ const LOGGER = (function () {
         isErrorLogginEnabled = extraOptions?.enableError ?? true;
 
         isDebugLogginEnabled = extraOptions?.enableDebug ?? true;
+
+        app_name = appName || "N/A";
 
         topicName = topic || "logs";
 
@@ -62,6 +69,9 @@ const LOGGER = (function () {
 
         mqttConnection = {
           connection: conn,
+          setAppName(appName: string) {
+            app_name = appName;
+          },
           enableErrorLogging() {
             isErrorLogginEnabled = true;
           },
@@ -93,20 +103,30 @@ const LOGGER = (function () {
             if (!isErrorLogginEnabled) return;
             conn?.publish(
               topicName,
-              JSON?.stringify({
-                payload: { ...payload, date: new Date(), level: "errors" },
+              tryStringifyJSONObject({
+                payload: {
+                  ...payload,
+                  date: new Date(),
+                  level: "errors",
+                  appName: app_name,
+                },
               }),
               1,
               true
             );
           },
 
-          debug(payload: messagePayloadToMqTTFromUsers) {
+          debug(payload: messagePayloadASArg) {
             if (!isDebugLogginEnabled) return;
             conn?.publish(
               topicName,
-              JSON?.stringify({
-                payload: { ...payload, date: new Date(), level: "debug" },
+              tryStringifyJSONObject({
+                payload: {
+                  ...payload,
+                  date: new Date(),
+                  level: "debug",
+                  appName: app_name,
+                },
               }),
               1,
               true
@@ -133,16 +153,18 @@ const LOGGER = (function () {
       return mqttConnection;
     },
 
-    error(payload: messagePayloadToMqTTFromUsers) {
+    error(payload: messagePayloadASArg) {
       if (!isErrorLogginEnabled) return;
       mqttConnection?.error(payload);
     },
 
-    debug(payload: messagePayloadToMqTTFromUsers) {
+    debug(payload: messagePayloadASArg) {
       if (!isDebugLogginEnabled) return;
       mqttConnection?.debug(payload);
     },
-
+    setAppName(appName: string) {
+      mqttConnection?.setAppName(appName);
+    },
     connect() {
       mqttConnection?.connect();
     },
